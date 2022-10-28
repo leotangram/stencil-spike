@@ -28,6 +28,7 @@
   </head>
   <body>
     <button id="side-drawer-button">Open Side Menu</button>
+    <p>Let's test this new <uc-tooltip text="We built this before, now it is better!">Tooltip!</uc-tooltip></p>
     <uc-side-drawer title="Main Menu">
       <nav class="side-nav">
         <ul>
@@ -42,9 +43,9 @@
       const sideDrawer = document.querySelector('uc-side-drawer');
 
       sideDrawerButton.addEventListener('click', () => {
-        if (!sideDrawer.open) {
-          console.log('Opening SideDrawer');
-          sideDrawer.open = true;
+        if (!sideDrawer.opened) {
+          // sideDrawer.open = true;
+          sideDrawer.open();
         }
         console.log(sideDrawer.open);
       });
