@@ -1,4 +1,4 @@
-import { Component, Element, h, Prop, State, Watch } from '@stencil/core';
+import { Component, Element, h, Listen, Prop, State, Watch } from '@stencil/core';
 import { AV_API_KEY } from '../../global/global';
 
 @Component({
@@ -16,6 +16,7 @@ export class StockPrice {
   @State() stockUserInput: string;
   @State() stockInputValid = false;
   @State() error: string;
+  @State() loading = false;
 
   @Prop({ mutable: true, reflect: true }) stockSymbol: string;
 
@@ -23,6 +24,7 @@ export class StockPrice {
   stockSymbolChanged(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.stockUserInput = newValue;
+      this.stockInputValid = true;
       this.fetchStockPrice(newValue);
     }
   }
@@ -44,6 +46,7 @@ export class StockPrice {
   }
 
   fetchStockPrice(stockSymbol: string) {
+    this.loading = true;
     fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${AV_API_KEY}`)
       .then(res => {
         if (res.status !== 200) {
@@ -58,7 +61,15 @@ export class StockPrice {
         this.error = null;
         this.fetchedPrice = +parsedRes['Global Quote']['05. price'];
       })
-      .catch(error => (this.error = error.message));
+      .catch(error => {
+        this.error = error.message;
+        this.fetchedPrice = null;
+      })
+      .finally(() => (this.loading = false));
+  }
+
+  hostData() {
+    return { class: this.error ? 'error' : '' };
   }
 
   componentWillLoad() {
@@ -92,6 +103,14 @@ export class StockPrice {
     console.log('disconnectedCallback');
   }
 
+  @Listen('ucSymbolSelected', { target: 'body' })
+  onStockSymbolSelected(event: CustomEvent) {
+    console.log('stock symbol selected: ' + event.detail);
+    if (event.detail && event.detail !== this.stockSymbol) {
+      this.stockSymbol = event.detail;
+    }
+  }
+
   render() {
     let dataContent = <p>Please enter a symbol</p>;
     if (this.error) {
@@ -100,10 +119,13 @@ export class StockPrice {
     if (this.fetchedPrice) {
       dataContent = <p>Price: ${this.fetchedPrice}</p>;
     }
+    if (this.loading) {
+      dataContent = <uc-spinner />;
+    }
     return [
       <form onSubmit={this.onFetchStockPrice.bind(this)}>
         <input id="stock-symbol" type="text" ref={el => (this.stockInput = el)} value={this.stockUserInput} onInput={this.onUserInput.bind(this)} />
-        <button type="submit" disabled={!this.stockInputValid}>
+        <button type="submit" disabled={!this.stockInputValid || this.loading}>
           Fetch
         </button>
       </form>,

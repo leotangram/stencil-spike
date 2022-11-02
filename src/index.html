@@ -39,6 +39,7 @@
       </nav>
     </uc-side-drawer>
     <uc-stock-price stock-symbol="AAPL"></uc-stock-price>
+    <uc-stock-finder></uc-stock-finder>
     <script>
       const sideDrawerButton = document.querySelector('#side-drawer-button');
       const sideDrawer = document.querySelector('uc-side-drawer');
@@ -55,5 +56,11 @@
         // sideDrawer.setAttribute('title', 'It changed via Attribute');
       }, 3000);
     </script>
+    <!-- <script>
+      const stockFinderEl = document.querySelector('uc-stock-finder');
+      stockFinderEl.addEventListener('ucSymbolSelected', event => {
+        console.log(event);
+      });
+    </script> -->
   </body>
 </html>
